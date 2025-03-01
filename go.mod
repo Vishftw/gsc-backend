@@ -4,14 +4,17 @@ go 1.22.7
 
 toolchain go1.23.6
 
-require github.com/jackc/pgx/v5 v5.7.2
+require (
+	cloud.google.com/go/secretmanager v1.14.5
+	github.com/jackc/pgx/v5 v5.7.2
+	github.com/joho/godotenv v1.5.1
+)
 
 require (
 	cloud.google.com/go/auth v0.14.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.7 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/iam v1.3.1 // indirect
-	cloud.google.com/go/secretmanager v1.14.5 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

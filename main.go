@@ -8,8 +8,10 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/jackc/pgx/v5"
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
+	secretspb "cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"github.com/jackc/pgx/v5"
+	"github.com/joho/godotenv"
 )
 
 type heartbeatResponse struct {
@@ -17,7 +19,7 @@ type heartbeatResponse struct {
 	Status string `json:"status"`
 }
 
-func heartbeatHandle	r(w http.ResponseWriter, r *http.Request) {
+func heartbeatHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	response := heartbeatResponse{
 		Name:   "gsc-backend",
@@ -29,8 +31,13 @@ func heartbeatHandle	r(w http.ResponseWriter, r *http.Request) {
 var db *pgx.Conn
 
 func initDB() {
-	if os.Getenv("ENV") != "LOCAL" {
-		_ = godotenv.Load()
+	var databaseURL string
+	var err error
+	if os.Getenv("ENV") == "LOCAL" {
+		err = godotenv.Load()
+		if err != nil {
+			log.Fatalf("Error loading .env file: %v", err)
+		}
 		databaseURL = os.Getenv("DATABASE_URL")
 		fmt.Println("Using local database URL:", databaseURL)
 	} else {
@@ -42,9 +49,6 @@ func initDB() {
 		fmt.Println("Using secret-managed database URL")
 	}
 
-
-	var err error
-	
 	db, err = pgx.Connect(context.Background(), databaseURL)
 	if err != nil {
 		log.Fatalf("Unable to connect to database: %v", err)
@@ -102,7 +106,7 @@ func getSecret(secretName string) (string, error) {
 	}
 	defer client.Close()
 
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT") // Set in Cloud Run  
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	accessRequest := &secretspb.AccessSecretVersionRequest{
 		Name: fmt.Sprintf("projects/%s/secrets/%s/versions/latest", projectID, secretName),
 	}
